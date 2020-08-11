@@ -341,7 +341,10 @@ $xsl_file_name= "./mavlink_to_html_table.xsl";
 #### 安装mavros方式一：apt-get
 
 ```shell
+# For ubuntu16.04 kinetic, use:
 sudo apt-get install ros-kinetic-mavros ros-kinetic-mavros-extras
+# For ubuntu18.04 melodic, use:
+sudo apt-get install ros-melodic-mavros ros-melodic-mavros-extras
 ```
 
 #### 安装mavros方式二：源码
@@ -367,10 +370,14 @@ https://sourceforge.net/projects/geographiclib/files/geoids-distrib/
 启动mavros
 
 ```
+roslaunch mavros px4.launch fcu_url:=/dev/ttyACM0:57600
+#
 roslaunch mavros px4.launch fcu_url:=/dev/ttyUSB0:921600
 #
 roslaunch mavros px4.launch fcu_url:="udp://:14540@127.0.0.1:14557"
 ```
+
+- Note: if `FCU: DeviceError:serial:open: Permission denied` happened, use: **sudo chmod 777 /dev/ttyACM0
 
 启动service，查看Imu相关数据
 
