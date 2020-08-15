@@ -146,6 +146,7 @@ ROS提供了一系列的命令供用户使用，而且可以很方便的使用`T
 |            | $ rosnode ping *node_name*                |                                                         |
 | rostopic   | $ rostopic list                           | 查看当前话题列表                                        |
 |            | $ rostopic pub                            | 发布                                                    |
+|            | $ rostopic echo                           | 查看话题内容                                            |
 | rosmsg     | $ rosmsg show *msg_name*                  | 查看msg具体信息                                         |
 | rosservice | $ rosservice list                         | 查看当前service列表                                     |
 |            | $ rosservice call *service_name*  *param* | 调用service                                             |
@@ -170,6 +171,8 @@ workspace_folder/          -- WORKSPACE
   |--package_1/
     |--CMakeLists.txt
     |--package.xml
+    |--include/
+    |--src/
     ...
   |--package_n/
     |--CMakeLists.txt
