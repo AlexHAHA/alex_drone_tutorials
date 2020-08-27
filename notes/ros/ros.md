@@ -93,14 +93,53 @@ $ sudo apt-get install python-catkin-tools
 
 ```
 gedit ~/.bashrc
-
 ```
 
 ### 问题及解决
 
+#### rosdep无法初始化
+
+**问题描述：**在运行`$sudo rosdep init`时会弹出如下错误：
+
+`ERROR: cannot download default sources list from:
+https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/sources.list.d/20-default.list
+Website may be down.`
+
+**解决方法：**
+
+参考：https://blog.csdn.net/qq_25368751/article/details/104248464
+
+第一步：
+
+由于无法更新下载*20-default.list*文件，那么直接新建好了。
+
+直接在/etc目录下新建/ros/rosdep/sources.list.d/20-default.list文件（注意sudo rosdep init失败时，/etc下并没有/ros目录，需要依次逐级新建），然后将https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/sources.list.d/20-default.list内容粘贴进去，内容如下：
+
+```
+# os-specific listings first
+yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/osx-homebrew.yaml osx
+# generic
+yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/base.yaml
+yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/python.yaml
+yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/ruby.yaml
+gbpdistro https://raw.githubusercontent.com/ros/rosdistro/master/releases/fuerte.yaml fuerte
+# newer distributions (Groovy, Hydro, ...) must not be listed anymore, they are being fetched from the rosdistro index.yaml instead
+```
+
+第二步：
+
+在/usr/lib/python2.7/dist-packages/rosdep2/sources_list.py中顶部直接插入两行代码取消SSL验证。
+
+```
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+```
+
+再次rosdep update。
+
 #### cmake卸载导致ros无法运行
 
-
+根据安装过程，从**1.4**重新开始安装。
 
 ### Demo:turtle-1
 
