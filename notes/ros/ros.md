@@ -612,15 +612,40 @@ add_dependencies(person_server ${PROJECT_NAME}_gencpp)
 
 ## rosparam
 
-在大型编程中可能会涉及到很多参数配置，在ROS中可以将这些参数放到一个YAML文件，运行时加载至rosmaster供所有节点访问。
+在大型编程中可能会涉及到很多参数配置，在ROS中可以将这些参数放到一个YAML文件，运行时加载至rosmaster的参数服务器中供所有节点访问。
 
-### 参数基本使用示例
+### 使用示例1
 
-我们首先在工作空间下新建一个package命名为**learning_parameter**，也即在/catkin_ws/src下创建了一个learning_parameter文件夹。
+我们首先在工作空间下新建一个package命名为**learning_parameter**，也即在/catkin_ws/src下创建了一个learning_parameter文件夹，然后在package下创建config文件夹，用于放置.yaml文件，文件结构如下：
+
+learning_parameter/
+
+|--config/
+
+​    |--turtle_param.yaml
+
+|--src
+
+​    |--parameter_test.cpp
+
+**turtle_param.yaml**
+
+```yaml
+background_b: 255
+background_g: 86
+background_r: 69
+rosdistro: 'melodic'
+roslaunch:
+  uris: {host_hcx_vpc__43763: 'http://hcx-vpc:43763/'}
+rosversion: '1.14.3'
+run_id: 077058de-a38b-11e9-818b-000c29d22e4d
+```
+
+**parameter_test.cpp**
 
 我们可以通过如下C++代码来操作param的读取和设置。
 
-```
+```c++
 int red, green, blue;
 // 读取背景颜色参数
 ros::param::get("/background_r", red);
