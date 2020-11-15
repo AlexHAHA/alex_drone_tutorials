@@ -243,11 +243,9 @@ static inline void mavlink_msg_heartbeat_decode(const mavlink_message_t* msg, ma
 </message>
 ```
 
+## How To Use
 
-
-### How To Use
-
-#### Generate headers
+### Generate headers
 
 首先下载[mavlink](https://github.com/mavlink/mavlink/)仓库代码，MAVLink仓库代码提供了GUI或者命令行两种方式生成不同语言的”Header"，最方便的就是运行GUI，可以通过如下命令行：
 
@@ -255,9 +253,32 @@ static inline void mavlink_msg_heartbeat_decode(const mavlink_message_t* msg, ma
 $python mavgenerate.py
 ```
 
-接下来根据GUI界面提示即可。
+接下来根据GUI界面提示即可，根据你的编程语言选择生成不同语言版本的库。
 
-#### Code in python
+### Demo in python
+
+我们以python环境编程为例，讲解如何使用mavlink进行通信。
+
+**python工程配置说明**
+
+生成的python版本的mavlink库文件中需要依赖*mavcrc.py*文件，因为在mavlink库文件中你会看到如下依赖的库：
+
+```python
+from __future__ import print_function
+from builtins import range
+from builtins import object
+import struct, array, time, json, os, sys, platform
+
+'''
+注意，根据mavcrc的路径，你可能需要进行适当修改导入路径
+'''
+from ...generator.mavcrc import x25crc
+import hashlib
+```
+
+*mavcrc.py*文件在mavlink GitHub的路径为：*mavlink-master/pymavlink/generator/mavcrc.py* ，你需要将这个文件拷贝到你的工程目录下，例如拷贝至工程目录的*generator*文件夹下面。
+
+**代码示例**
 
 ```python
 import time
@@ -307,7 +328,19 @@ if __name__ == '__main__':
     main()
 ```
 
+### GCS setting
 
+在进行mavlink开发测试中，最好的方式是与GCS进行通信测试，GCS默认会发送1hz的hearbeat message，并且其接收的mavlink消息能够显示出来，这样你写的mavlink工程就能往GCS发送数据或者接收GCS发送的heartbeat消息了。
+
+**新建一个mavlink连接**
+
+最常用的连接是UDP或者串口，在本机测试中，我们一般使用UDP方式进行mavlink通信调试，可以点击`Comm Links->Add`添加一个连接，如下图：
+
+<img src="source\gcs_udp_addlink.PNG" style="zoom:40%;" />
+
+点击`Edit`进行配置编辑，例如对于UDP连接来说，可以配置GCS端的tx和rx端口以及目的IP，如下图所示：
+
+<img src="source/GCS_udp_setting.png" style="zoom:40%">
 
 ### Display In HTML
 
@@ -328,91 +361,4 @@ $xsl_file_name= "./mavlink_to_html_table.xsl";
 
 2. python: 运行doc/mavlink_gitbook.py文件即可，默认在doc文件夹下生成messages文件夹，存放生成后的html文件。
 
-
-
-## MAVROS
-
-- API: http://wiki.ros.org/mavros#Nodes
-
-- Github: https://github.com/mavlink/mavros
-
-### installation
-
-#### 安装mavros方式一：apt-get
-
-```shell
-# For ubuntu16.04 kinetic, use:
-sudo apt-get install ros-kinetic-mavros ros-kinetic-mavros-extras
-# For ubuntu18.04 melodic, use:
-sudo apt-get install ros-melodic-mavros ros-melodic-mavros-extras
-```
-
-#### 安装mavros方式二：源码
-
-如果你需要进行二次开发，必然要修改源码，那么只能使用这种安装方式。
-
-参考教程：
-
-Ref:https://www.ncnynl.com/archives/201709/2077.html
-
-Ref:https://blog.csdn.net/qq_38649880/article/details/88082360?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param
-
-#### 安装GeographicLib
-
-方式一：通过运行install_geographiclib_datasets.sh进行安装，注意这种方式需要在能连接其服务器时才行，很多时候因为网络问题并不能安装成功，所以不建议采用这种安装方式。
-sudo /opt/ros/kinetic/lib/mavros/install_geographiclib_datasets.sh
-方式二：下载缺少的GeographicLib文件，在没有安装GeographicLib之前你可以先运行一下mavros，可以看到弹出错误：即无法在路径`/usr/share/GeographicLib/geoids`下找到egm96-5.pgm文件，你可以从下面链接下载：
-https://sourceforge.net/projects/geographiclib/files/geoids-distrib/
-选择`egm96-5.tar.bz2`下载解压后拷贝至`/usr/share/GeographicLib/geoids`。
-
-### 测试
-
-启动mavros
-
-```
-roslaunch mavros px4.launch fcu_url:=/dev/ttyACM0:57600
-#
-roslaunch mavros px4.launch fcu_url:=/dev/ttyUSB0:921600
-#
-roslaunch mavros px4.launch fcu_url:="udp://:14540@127.0.0.1:14557"
-```
-
-- Note: if `FCU: DeviceError:serial:open: Permission denied` happened, use: **sudo chmod 777 /dev/ttyACM0
-
-启动service，查看Imu相关数据
-
-```
- $ rosservice call /mavros/set_stream_rate 0 10 1
- $ rostopic echo /mavros/imu/data
-```
-
-
-
-## MAVSDK
-
-The [MAVSDK](https://mavsdk.mavlink.io/develop/en/) is a [MAVLink](https://mavlink.io/en/) Library with APIs for [C++](https://mavsdk.mavlink.io/develop/en/cpp/), [iOS](http://dronecode-sdk-swift.s3.eu-central-1.amazonaws.com/docs/master/index.html), Python and Android.
-
-
-
-### Imu
-
-**File: sensor_msgs/Imu.msg**
-
-```
-std_msgs/Header header
-geometry_msgs/Quaternion orientation
-float64[9] orientation_covariance
-geometry_msgs/Vector3 angular_velocity
-float64[9] angular_velocity_covariance
-geometry_msgs/Vector3 linear_acceleration
-float64[9] linear_acceleration_covariance
-```
-
-**geometry_msgs/Vector3.msg**
-
-```
-float64 x
-float64 y
-float64 z
-```
 

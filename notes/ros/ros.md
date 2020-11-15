@@ -1,5 +1,49 @@
 # ROS
 
+**Author:** alex
+
+**Date:**2020/05/25
+
+
+
+## ROS基础概念
+
+ROS的目标是提高机器人研发中的软件复用率
+
+### 通信机制
+
+松耦合分布式通信
+
+### 生态系统
+
+发行版（Distribution）：ROS发行版包括一系列带有版本号、可以直接安装的功能包。
+
+软件源（Repository）：ROS依赖于共享网络上的开源代码，不同的组织结构可以开发或者共享自己的机器人软件。是存放编译好的安装文件，可以apt-get install进行安装你需要的功能包。
+
+ROS wiki：记录ROS信息文档的主要论坛。
+
+ROS Answers：咨询ROS相关问题的网站
+
+Blog：发布ROS社区新闻、图片、视频等，http://www.ros.org/news
+
+
+
+## ROS核心概念
+
+### 节点与节点管理器
+
+节点Node就是一个执行单元：
+
+- 执行具体任务的进程、独立运行的可执行文件；
+- 不同节点可以使用不同的编程语言，可分布式运行在不同主机；
+- 节点在系统中的名称必须是唯一的。
+
+节点管理器ROS Master——控制中心：
+
+- 为节点提供命名和注册服务
+
+
+
 ## ROS环境配置
 
 ### ROS版本
@@ -141,28 +185,6 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 根据安装过程，从**1.4**重新开始安装。
 
-### Demo:turtle-1
-
-#### 启动ROS Master
-
-```
-$roscore
-```
-
-#### 启动节点
-
-1、启动仿真界面节点：turtlesim_node
-
-```
-rosrun turtlesim turtlesim_node
-```
-
-2、启动控制节点：turtle_teleop_key
-
-```
-rosrun turtlesim turtlesim_node
-```
-
 ## ROS使用基础
 
 ### ROS命令
@@ -185,6 +207,7 @@ ROS提供了一系列的命令供用户使用，而且可以很方便的使用`T
 |            | $ rosnode ping *node_name*                |                                                         |
 | rostopic   | $ rostopic list                           | 查看当前话题列表                                        |
 |            | $ rostopic pub                            | 发布                                                    |
+|            | $ rostopic type                           | 查看topic的类型信息                                     |
 |            | $ rostopic echo                           | 查看话题内容                                            |
 | rosmsg     | $ rosmsg show *msg_name*                  | 查看msg具体信息                                         |
 | rosservice | $ rosservice list                         | 查看当前service列表                                     |
@@ -196,6 +219,8 @@ ROS提供了一系列的命令供用户使用，而且可以很方便的使用`T
 |            | $ rosparam load *yaml_file*               |                                                         |
 | rospack    | $rospack list                             | 查看当前所有package及其路径                             |
 |            |                                           |                                                         |
+
+
 
 
 
@@ -380,13 +405,22 @@ Person.msg
 generate_messages(DEPENDENCIES std_msgs)
 
 catkin_package(
-message_runtime
+  CATKIN_DEPENDS message_runtime
 )
 ```
 
 4、进行catkin_make编译生成语言相关文件
 
 编译完成后，可在工作空间**devel/include**文件夹下找到与package同名的文件夹，并且有**Person.h**文件。
+
+5\
+
+```
+#include <ros/ros.h>
+#include "learning_topic/Person.h"
+```
+
+
 
 #### Publisher实现
 
@@ -446,7 +480,10 @@ void callback(const pkg_name::Person::ConstPtr& msg)
 2、实例化subscriber，注册回调函数
 
 ```
-ros::Subscriber person_info_sub = n.subscriber("/person_info", 10, callback)
+ros::Subscriber person_info_sub = n.subscribe("/person_info", 10, callback);
+
+# make sure ros::spin() run! Don't have while loop before spin()
+ros::spin();
 ```
 
 3、配置编译规则
@@ -475,7 +512,7 @@ service是服务器端(server)和客户端(client)之间进行通讯的消息机
 
 ### 服务基本使用示例
 
-我们将实现如下图所示的服务通信，首先在工作空间下新建一个package命名为**learning_service**，也即在/catkin_ws/src下创建了一个learning_topic文件夹。
+我们将实现如下图所示的服务通信，首先在工作空间下新建一个package命名为**learning_service**，也即在/catkin_ws/src下创建了一个learning_service文件夹。
 
 <img src="source\service_example.PNG" style="zoom:80%;" />
 
@@ -526,7 +563,7 @@ message_runtime
 
 4、进行catkin_make编译生成语言相关文件
 
-编译完成后，可在工作空间**devel/include**文件夹下找到与package同名的文件夹，并且有**Person.h**文件。
+编译完成后，可在工作空间**devel/include**文件夹下找到与package同名的文件夹，并且有*Person.h, PersonRequest.h,PersonResponse.h*文件。
 
 #### 客户端client
 
@@ -677,13 +714,11 @@ http://wiki.ros.org/roslaunch/XML
 - pkg_name为功能包名
 - file.launch为launch文件名
 
-
-
 ### launch文件语法
 
 launch文件的根元素都是采用<launch>标签定义。
 
-#### 启动节点
+#### 节点启动node
 
 启动节点的代码格式为：`<node pkg="pkg_name" type="executable_name" name="node_name"/>`。其中：
 
@@ -701,7 +736,24 @@ launch文件的根元素都是采用<launch>标签定义。
 </launch>
 ```
 
-#### 设置ROS参数
+#### group
+
+很多时候，你需要启动多个同样的实例程序，例如你希望在本地计算机启动多个*turtle*实例，但很显然这些实例程序都是一样的，而且是同一个node，只是启动了多次而且，那么如何将这些同名的node进行管理和区分呢？
+
+我们可以使用分组的概念，将每个node划分到不同的*group*下面，实现方式很简单，在launch文件中，使用*group*标签即可新建一个组，在这个组下面启动的node，**ROS master会自动给其添加一级前缀名（名字就是group标签定义的namespace名称）**。
+
+```xml
+<group ns="turtlesim1">
+    <node pkg="turtlesim" name="sim" type="turtlesim_node"/>
+</group>
+<group ns="turtlesim2">
+   <node pkg="turtlesim" name="sim" type="turtlesim_node"/>
+</group>
+```
+
+也就是说，namespace的名称会作为第一级**路径**名称添加到每个node的前头，这样就能够定位区分不同的node，例如，第一个node的topic就可以使用**/turtlesim1/cmd_vel**来访问了。
+
+#### 文件参数param
 
 设置ROS系统运行中的参数，存储在参数服务器中。代码格式为：
 
@@ -747,6 +799,57 @@ launch内部参数顾名思义就是只能在launch文件内部使用的参数�
 
 - file：包含的其他launch文件路径
 
+#### 参数设置rosparam
+
+对于大型工程来说，有很多参数需要配置，完全写在*launch*文件中不同合适，这时候可以将这些参数使用**.yaml**文件进行存储和描述，并且可以使用<rosparam>标签引用**yaml**文件，启动后这些参数会被放置到参数服务器中。
+
+**workspace**
+
+```
+|--onboard_app/
+  |--config/
+    |--param.yaml
+  |--launch/
+    |--test.launch
+```
+
+**yaml**
+
+```yaml
+# Common configuration for onboard application
+#
+pod:
+  uart_name: "/dev/ttyS0"
+  uart_baudrate: 115200
+```
+
+**launch**
+
+```xml
+<?xml version="1.0"?>
+<launch>
+    <node pkg="onboard_app" type="pod_app" name="pod_app" output="screen" />
+    <rosparam file="$(find onboard_app)/config/param.yaml" command="load" />
+</launch>
+```
+
+**how to use param defined in yaml**
+
+```c++
+int main(int argc, char **argv)
+{
+    ros::init(argc, argv, "drone_pod_app");
+    ros::NodeHandle nh;
+
+    nh.param("/pod/uart_name", name, std::string("/default"));
+    nh.param("/gcs/gcs_ip", gcs_ip, std::string("/default"));
+    ros::spin();
+    return 0;
+}
+```
+
+
+
 ### launch文件参数传递
 
 节点中如果使用launch文件中的参数，可以有三种方式：
@@ -759,7 +862,7 @@ launch内部参数顾名思义就是只能在launch文件内部使用的参数�
 
 ### 例程
 
-#### 例程1
+#### 参数使用
 
 1、文件`alex.launch`
 
@@ -804,6 +907,58 @@ int main(int argc, char **argv)
 }
 ```
 
+#### group实例多个node
+
+使用group可以实例化多个node，例如启动多个小海龟节点，每个节点划分到不同group中。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <group ns="turtlesim1">
+    	<node pkg="turtlesim" name="sim" type="turtlesim_node"/>
+    </group>
+    <group ns="turtlesim2">
+        <node pkg="turtlesim" name="sim" type="turtlesim_node"/>
+    </group>
+</launch>
+```
+
+查看输出如下：
+
+```
+alex@alex:~$ roslaunch px4 multi_turtle.launch 
+... logging to /home/alex/.ros/log/5a80d71c-1219-11eb-9df8-fc7774f4aa0b/roslaunch-alex-4609.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://alex:41865/
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.7
+
+NODES
+  /turtlesim1/
+    sim (turtlesim/turtlesim_node)
+  /turtlesim2/
+    sim (turtlesim/turtlesim_node)
+
+auto-starting new master
+process[master]: started with pid [4620]
+ROS_MASTER_URI=http://localhost:11311
+
+setting /run_id to 5a80d71c-1219-11eb-9df8-fc7774f4aa0b
+process[rosout-1]: started with pid [4631]
+started core service [/rosout]
+process[turtlesim1/sim-2]: started with pid [4634]
+process[turtlesim2/sim-3]: started with pid [4635]
+
+```
+
 
 
 ## rostest
@@ -819,57 +974,73 @@ catkin_make run_tests_<node_name>
 
 
 
-## ROS基础概念
+## 实战例程
 
-ROS的目标是提高机器人研发中的软件复用率
+### 小海龟Turtle
 
-### 通信机制
+### 一个小海龟
 
-松耦合分布式通信
+#### 启动ROS Master
 
-### 生态系统
+```bash
+$roscore
+```
 
-发行版（Distribution）：ROS发行版包括一系列带有版本号、可以直接安装的功能包。
+#### 启动节点
 
-软件源（Repository）：ROS依赖于共享网络上的开源代码，不同的组织结构可以开发或者共享自己的机器人软件。是存放编译好的安装文件，可以apt-get install进行安装你需要的功能包。
+1、启动仿真界面节点：turtlesim_node
 
-ROS wiki：记录ROS信息文档的主要论坛。
+```bash
+$rosrun turtlesim turtlesim_node
+```
 
-ROS Answers：咨询ROS相关问题的网站
+2、启动控制节点：turtle_teleop_key
 
-Blog：发布ROS社区新闻、图片、视频等，http://www.ros.org/news
+```bash
+$rosrun turtlesim turtle_teleop_key
+```
 
+#### 控制指令
 
-
-## ROS核心概念
-
-### 节点与节点管理器
-
-节点Node就是一个执行单元：
-
-- 执行具体任务的进程、独立运行的可执行文件；
-- 不同节点可以使用不同的编程语言，可分布式运行在不同主机；
-- 节点在系统中的名称必须是唯一的。
-
-节点管理器ROS Master——控制中心：
-
-- 为节点提供命名和注册服务
-
-
-
-
-
-
+```bash
+#小海龟转圈圈，设置线速度和角速度，r设置每秒发送次数
+$rostopic pub -r 10 /turtle1/cmd_vel geometry_msgs/Twist "linear:
+  x: 1.0
+  y: 0.0
+  z: 0.0
+angular:
+  x: 0.0
+  y: 0.0
+  z: 1.0"
+```
 
 
 
+### 两个小海龟
 
+ref:https://blog.csdn.net/weixin_44747240/article/details/104803046
 
+创建小海龟
 
+```bash
+$rosservice call /spawn "x: 3.0
+y: 5.0
+theta: 0.0
+name: 'hello'"
+```
 
+控制特定小海龟
 
-
-
+```bash
+$rostopic pub -r 10 /hello/cmd_vel geometry_msgs/Twist "linear:
+  x: 1.0
+  y: 0.0
+  z: 0.0
+angular:
+  x: 0.0
+  y: 0.0
+  z: 2.0"
+```
 
 
 
