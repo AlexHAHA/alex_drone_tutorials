@@ -480,6 +480,14 @@ gateway 192.168.1.1
 iface enp2s0 inet6 auto
 ```
 
+配置dns，编辑配置文件/etc/resolv.conf
+
+```
+nameserver 114.114.114.114
+```
+
+
+
 ### 重启网络
 
 ```
