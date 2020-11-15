@@ -464,7 +464,28 @@ rm /etc/ssh/ssh_host_*
 sudo dpkg-reconfigure openssh-server
 ```
 
+## 固定IP
 
+### 配置
+
+终端输入**vi /etc/network/interfaces**命令编辑配置文件,增加如下内容： 
+
+```
+#enp2s0为网卡名
+auto enp2s0
+iface enp2s0 inet static
+address 192.168.1.211
+netmask 255.255.255.0
+gateway 192.168.1.1
+iface enp2s0 inet6 auto
+```
+
+### 重启网络
+
+```
+ifconfig ens33 down
+ifconfig ens33 up
+```
 
 # linux命令
 
