@@ -6,7 +6,7 @@
 
 ## installation
 
-### 安装mavros方式一：apt-get
+### 安装方式一：apt-get
 
 ```shell
 # For ubuntu16.04 kinetic, use:
@@ -15,7 +15,7 @@ sudo apt-get install ros-kinetic-mavros ros-kinetic-mavros-extras
 sudo apt-get install ros-melodic-mavros ros-melodic-mavros-extras
 ```
 
-### 安装mavros方式二：源码
+### 安装方式二：源码
 
 如果你需要进行二次开发，必然要修改源码，那么只能使用这种安装方式。
 
@@ -92,7 +92,7 @@ roslaunch mavros px4.launch fcu_url:="udp://:14540@127.0.0.1:14557"
 
 #### 使用QGC设置
 
-QGC连接飞控后，在参数中搜索**SER_TEL1_BAUD**，该参数用来设置TELEM1串口的波特率，选择**921600 8N1**，重启飞控生效。
+QGC连接飞控后，在参数中搜索`SER_TEL1_BAUD`，该参数用来设置TELEM1串口的波特率，选择**921600 8N1**，重启飞控生效。
 
 
 
@@ -100,7 +100,9 @@ QGC连接飞控后，在参数中搜索**SER_TEL1_BAUD**，该参数用来设置
 
 
 
-### 树莓派设置
+### 机载计算机设置
+
+#### 树莓派设置
 
 树莓派3/4有两个串口：/dev/ttyAMA0和/dev/ttyS0，其中默认AMA0用于板载蓝牙，S0用于外设，其引脚对应关系为：
 

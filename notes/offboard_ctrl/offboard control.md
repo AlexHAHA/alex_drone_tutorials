@@ -2,12 +2,6 @@
 
 
 
-
-
-## 机制
-
-
-
 ## mavros实现offboard
 
  mavros的本质是使用ROS实现对底层的mavlink通信的封装，也就是说你不需要关系mavlink协议如何实现，也不需要关心串口编程或者UDP/TCP编程如何实现，只需要会ROS即可。运行ROS的计算机会自动解析mavlink数据并按类型分后发布到相应的话题，用户只需要订阅话题即可获取飞控状态信息，同样的，用户需要实现的飞行控制时，只需要向相应话题发布msg或者调用相应service即可实现对飞控的控制指令发送。
@@ -18,7 +12,7 @@
 
 
 
-mavros??
+mavros一般通过其自带的launch文件来启动，mavros提供了几个基本的launch文件，在mavros安装路径下：
 
 ```
 /opt/ros/melodic/share/mavros/launch
@@ -30,7 +24,7 @@ mavlink_bridge.launch
 
 
 
-px4.launch
+px4.launch文件内容如下：
 
 ```html
 <launch>
@@ -60,11 +54,11 @@ px4.launch
 </launch>
 ```
 
-**Note**
+**px4.launch解析**
 
 px4.launch set arg:config_yaml = px4_config.yaml and pluginlists_yaml = px4.pluginlists.yaml
 
-px4.launch will call node.launch(/opt/ros/melodic/share/mavros/launch)
+px4.launch文件会调用node.launch文件，其路径为/opt/ros/melodic/share/mavros/launch。
 
 
 
@@ -104,17 +98,17 @@ $ roslaunch px4 mavros_posix_sitl.launch
 
 以上命令会打开一个gazebo窗口并且显示一个四旋翼无人机，同时会启动mavros，接下来就可以通过GCS或者编写程序来控制无人机了。
 
+**启动流程的相关解释：**
+
+mavros_posix_sitl.launch 调用`px4.launch(/opt/ros/melodic/share/mavros/launch) `
+
+px4.launch进行参数配置，加载文件`px4_config.yaml` and `px4.pluginlists.yaml`
+
+px4.launch 调用`node.launch(/opt/ros/melodic/share/mavros/launch)`
 
 
-mavros_posix_sitl.launch will call px4.launch(/opt/ros/melodic/share/mavros/launch) 
 
-px4.launch set px4_config.yaml and px4.pluginlists.yaml
-
-px4.launch will call node.launch(/opt/ros/melodic/share/mavros/launch)
-
-
-
-#### setup vehicle type
+#### 设置无人机类型
 
 ~/PX4_Firmware/Tools/sitl_gazebo/models
 ~/PX4_Firmware/Tools/sitl_gazebo/models/rotors_description/urdf
@@ -138,9 +132,7 @@ availiable vehicle type: iris, standard_vtol, plane
 
 ## 多机
 
-https://zhuanlan.zhihu.com/p/147865513?from_voters_page=true
-
-in launch file, use <group> to define different namespace that can hold multiple mavros node
+如果进行多机控制，那么需要区分每个无人机，获取其信息并发送控制指令，我们可以在`launch`文件中使用<group>标签来定义一个或多个命名空间，这样在每个命名空间下运行的mavros节点就可以相互独立。 
 
 ### 多机仿真环境启动
 
@@ -269,7 +261,7 @@ alex@alex:~$
 
 <img src="source\multidrone_sim_node_graph.PNG" style="zoom:40%;" />
 
-### duoji shiji??
+### 多机示例
 
 
 

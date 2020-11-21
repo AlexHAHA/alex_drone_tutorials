@@ -80,6 +80,8 @@ export ROS_HOSTNAME=alex
 export ROS_MASTER_URI=http://alex:11311
 ```
 
+修改完成后`source ~/.bashrc`重新载入即可。
+
 2、在树莓派上修改*~/.bashrc*文件，增加如下两行：
 
 ```
@@ -87,7 +89,7 @@ export ROS_HOSTNAME=raspberrypi
 export ROS_MASTER_URI=http://alex:11311
 ```
 
-
+修改完成后`source ~/.bashrc`重新载入即可。
 
 ## 测试
 
