@@ -19,10 +19,7 @@
 
 1. 打开SD Card copier
 2. copy from选择（/dev/mmcblk0）的选项， copy to Device 选择目标的sd。
-
-<img src="sources/img_sd copier.jpg">
-
-1.  点击开始，克隆过程大概10-15分钟
+3. 点击开始，克隆过程大概10-15分钟
 
 优点：
 
@@ -32,6 +29,8 @@
 **备注：**树莓派识别NTFS格式的SD卡，请先将SD卡格式化(Windows->右键->格式化)时选择file system=NTFS。
 
 ### 使用dd命令
+
+这个方法对所有系统都可用，不论raspbian还是ubuntu。
 
 #### 镜像备份
 
@@ -432,7 +431,7 @@ sudo pip3 install keras
 
 # 树莓派安装Ubuntu系统
 
-## 系统安装
+## 系统安装与配置
 
 ### 系统下载
 
@@ -460,9 +459,7 @@ sudo apt-get upgrade
 sudo apt-get install xubuntu-desktop
 （3）重启后进入系统
 
-## ssh
-
-### 配置
+#### ssh配置
 
 1. Ubuntu系统默认安装了openssh-client，如果希望启动本机ssh服务就需要安装openssh-server:
 
@@ -486,8 +483,55 @@ $ sudo service ssh start
 ```
 $ ps -e |grep ssh
 ```
+#### 固定IP
 
-### 开机自启动
+使用ubuntu时注意，不同版本进行固定IP配置时修改的文件不一样。
+
+- Ubuntu-Desktop版本
+
+终端输入**vi /etc/network/interfaces**命令编辑配置文件,增加如下内容： 
+
+```
+#loopback network interface
+auto lo
+iface lo inet loopback
+#eth0为网卡名
+auto eth0
+iface eth0 inet static
+address 192.168.1.211
+netmask 255.255.255.0
+gateway 192.168.1.1
+dns-nameserver 8.8.8.8
+```
+
+重启网络
+
+```
+ifconfig eth0 down
+ifconfig eth0 up
+```
+
+- Ubuntu-Server版本
+
+终端输入**vi /etc/netplan/50-cloud-init.yaml**命令编辑配置文件,修改如下内容：
+
+```
+network:
+    ethernets:
+        eth0:
+            address: [192.168.1.201/24]
+            dhcp4: false
+            gateway4: 192.168.1.1
+            nameservers:
+                addresses: [192.168.1.1]
+                addresses: [8.8.8.8, 114.114.114.114]
+```
+
+注意，以上冒号后面必须加空格！
+
+应用配置：`sudo netplan apply`.
+
+#### 开机自启动
 
 首先进行配置文件修改，ssh-server配置文件位于/etc/ssh/sshd_config，在这里可以定义SSH的服务端口，默认端口是22，你可以自己定义成其他端口号，如222。把配置文件中的”PermitRootLogin without-password”加一个”#”号,把它注释掉，再增加一句”PermitRootLogin yes”。
 
@@ -534,33 +578,6 @@ rm /etc/ssh/ssh_host_*
 sudo dpkg-reconfigure openssh-server
 ```
 
-## 固定IP
-
-### 配置
-
-终端输入**vi /etc/network/interfaces**命令编辑配置文件,增加如下内容： 
-
-```
-#loopback network interface
-auto lo
-iface lo inet loopback
-#eth0为网卡名
-auto eth0
-iface eth0 inet static
-address 192.168.1.211
-netmask 255.255.255.0
-gateway 192.168.1.1
-dns-nameserver 8.8.8.8
-```
-
-
-
-### 重启网络
-
-```
-ifconfig eth0 down
-ifconfig eth0 up
-```
 
 # linux命令
 
