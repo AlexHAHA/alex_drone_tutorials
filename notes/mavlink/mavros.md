@@ -82,6 +82,36 @@ roslaunch mavros px4.launch fcu_url:="udp://:14540@127.0.0.1:14557"
 
 
 
+## 飞行平台配置
+
+### PX4飞控设置
+
+#### 串口设置
+
+由于机载计算机进行飞行控制时需要很高的实时性，mavros会检测通信实时性，如果串口波特率设置太低，则会提示`TM:RTT too high for timesync:17.85ms`，故应该配置高速波特率。
+
+#### 使用QGC设置
+
+QGC连接飞控后，在参数中搜索**SER_TEL1_BAUD**，该参数用来设置TELEM1串口的波特率，选择**921600 8N1**，重启飞控生效。
+
+
+
+飞控的`SYS_COMPANION` 参数设置为`Companion Link (921600 baud, 8N1)`
+
+
+
+### 树莓派设置
+
+树莓派3/4有两个串口：/dev/ttyAMA0和/dev/ttyS0，其中默认AMA0用于板载蓝牙，S0用于外设，其引脚对应关系为：
+
+| 物理引脚BOARD | BCM编码 | 串口引脚 |
+| ------------- | ------- | -------- |
+| 8             | 14      | TX       |
+| 10            | 15      | RX       |
+|               |         |          |
+
+
+
 ## MAVSDK
 
 The [MAVSDK](https://mavsdk.mavlink.io/develop/en/) is a [MAVLink](https://mavlink.io/en/) Library with APIs for [C++](https://mavsdk.mavlink.io/develop/en/cpp/), [iOS](http://dronecode-sdk-swift.s3.eu-central-1.amazonaws.com/docs/master/index.html), Python and Android.
