@@ -31,6 +31,48 @@
 
 **备注：**树莓派识别NTFS格式的SD卡，请先将SD卡格式化(Windows->右键->格式化)时选择file system=NTFS。
 
+### 使用dd命令
+
+#### 镜像备份
+
+1. 将树莓派内存卡取下插到ubuntu系统计算机上；
+
+2. 在ubuntu系统计算机运行命令`df -h`查看分区，一般来说/dev/sdb1和/dev/sdb2是树莓派的系统分区；
+
+3. 使用dd命令将树莓派内存卡内的系统备份至本地：
+
+   ```bash
+   #opt1:备份系统到本地镜像文件
+   sudo dd if=/dev/sdb of=/home/alex/Desktop/raspberry_ros.img
+   #opt2:备份系统到本地压缩镜像文件
+   sudo dd if=/dev/sdb | gzip>/home/alex/Desktop/raspberry_ros.img.xz
+   ```
+
+4. 备份过程中没有进度条，耐心等待；
+
+5. 得到img文件后，也可使用dd命令烧写至一个新的SD卡中
+
+   1）可以通过dd命令进行烧写：
+
+   ```bash
+   # 使用镜像文件制作
+   sudo dd if=raspberry_ros.img of=/dev/sdb`
+   # 使用压缩镜像文件制作
+   gzip -c -d ghost_linux_latelee.img.gz | dd of=/dev/sda
+   ```
+
+   2）也可以将镜像文件（非压缩）使用WinDiskImager进行烧写（推荐）。
+
+#### 系统拷贝
+
+可以使用dd命令将树莓派系统直接拷贝至SD卡中，打开树莓派后，插入格式化的SD卡，然后在树莓派运行命令：
+
+```bash
+$ sudo dd bs=4m if=/dev/mmcblk0 of=/dev/sda
+```
+
+拷贝完成后（拷贝过程很长，可能一个多小时），将新卡插入树莓派启动即可。
+
 ## 无屏配置
 
 本方法适用很多时候没有显示屏，进行树莓派访问和设置。
@@ -390,6 +432,34 @@ sudo pip3 install keras
 
 # 树莓派安装Ubuntu系统
 
+## 系统安装
+
+### 系统下载
+
+由于官网只提供了最新版本的下载，如果希望下载旧版本，那么可以去网站：http://old-releases.ubuntu.com/releases/下载，例如下载树莓派4对应的ubunt18.04.4 版本则可以打开网页中显示的相应文件夹即可：http://old-releases.ubuntu.com/releases/18.04.4/。
+
+你会发现即使是ubuntu18.04版本仍然分了很多小版本，他们的名字代表的含义如下：
+
+- server: 体积小，没有桌面
+- armhf: 32-bit
+- arm64: 64-bit
+
+
+
+注意：
+
+1、树莓派4有4GB内存版本和8GB内存版本，其中4GB内存版本只能安装32bit系统，即armhf版本，而8GB内存版本可以安装64bit系统及arm64版本。
+
+### 系统配置
+
+对于server版本的系统，初次登录的Login和password都是ubuntu，登录上就要更改password，这里我统一修改为alex0610。
+（1）更新系统
+sudo apt-get update
+sudo apt-get upgrade
+（2）安装桌面环境（三个中任意选择：xubuntu-desktop、lubuntu-desktop、kubuntu-desktop）
+sudo apt-get install xubuntu-desktop
+（3）重启后进入系统
+
 ## ssh
 
 ### 配置
@@ -471,19 +541,16 @@ sudo dpkg-reconfigure openssh-server
 终端输入**vi /etc/network/interfaces**命令编辑配置文件,增加如下内容： 
 
 ```
-#enp2s0为网卡名
-auto enp2s0
-iface enp2s0 inet static
+#loopback network interface
+auto lo
+iface lo inet loopback
+#eth0为网卡名
+auto eth0
+iface eth0 inet static
 address 192.168.1.211
 netmask 255.255.255.0
 gateway 192.168.1.1
-iface enp2s0 inet6 auto
-```
-
-配置dns，编辑配置文件/etc/resolv.conf
-
-```
-nameserver 114.114.114.114
+dns-nameserver 8.8.8.8
 ```
 
 
@@ -491,8 +558,8 @@ nameserver 114.114.114.114
 ### 重启网络
 
 ```
-ifconfig ens33 down
-ifconfig ens33 up
+ifconfig eth0 down
+ifconfig eth0 up
 ```
 
 # linux命令
