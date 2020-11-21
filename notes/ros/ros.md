@@ -82,7 +82,12 @@ $sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E3
 
 ```shell
 $sudo apt-get update
+##opt1
 $sudo apt-get install ros-kinetic-desktop-full
+##opt2 ROS, rqt, rviz, and robot-generic libraries
+$sudo apt install ros-melodic-desktop
+##opt3 ROS package, build, and communication libraries. No GUI tools.
+$sudo apt install ros-melodic-ros-base
 ```
 
 如果已经安装好ROS，但cmake卸载了，那么很多ROS包也会被卸载，需要从**1.4**重新执行安装过程。
@@ -149,7 +154,29 @@ gedit ~/.bashrc
 https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/sources.list.d/20-default.list
 Website may be down.`
 
-**解决方法：**
+**解决方法一：**
+
+由于raw.githubusercontent.com地址被封了，无法进行域名解析故访问，可以查询其真实IP并添加至hosts文件。
+
+1. 查询真实IP
+
+通过IPAddress.com首页,输入raw.githubusercontent.com查询到真实IP地址
+
+IPAddress.com网址：https://www.ipaddress.com/
+
+我们可以看到其IP为：199.232.96.133
+
+2. 添加至hosts文件
+
+打开终端，输入`sudo vi /etc/hosts`，添加如下：
+
+```
+199.232.96.133  raw.githubusercontent.com
+```
+
+然后重新执行`sudo rosdep init`即可。
+
+**解决方法二：**
 
 参考：https://blog.csdn.net/qq_25368751/article/details/104248464
 
